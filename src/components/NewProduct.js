@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 // Redux Actions
 import { createNewProductAction } from "../actions/productsActions";
+import { showAlertAction, hideAlertAction } from "../actions/alertsActions";
 
 const NewProduct = ({ history }) => {
   // State
@@ -12,13 +13,19 @@ const NewProduct = ({ history }) => {
   // Use useDispatch and get a function
   const dispatch = useDispatch();
 
-  // Store States
+  // Store State :                      storestate.reducer.state
   const loading = useSelector((state) => state.products.loading);
   const error = useSelector((state) => state.products.error);
+  const alert = useSelector((state) => state.alerts.alert);
 
+  /* ACTIONS */
   // Dispatch is used to call the functions in the actions
-  // Call the action of the productsActions
+  // Products Action
   const addProduct = (product) => dispatch(createNewProductAction(product));
+  // Alert Action
+  const sendAlert = (alert) => dispatch(showAlertAction(alert));
+  // Hide Alert Action
+  const hideAlert = () => dispatch(hideAlertAction());
 
   // Handle submit
   const submitNewProduct = (e) => {
@@ -26,10 +33,16 @@ const NewProduct = ({ history }) => {
 
     // Validate
     if (name.trim() === "" || price <= 0) {
+      const alert = {
+        msg: "Ambos campos son obligatorios",
+        classes: "alert alert-danger text-center text-uppercase p1",
+      };
+      sendAlert(alert);
       return;
     }
 
     // No errors
+    hideAlert();
 
     // Create new product
     addProduct({ name, price });
@@ -50,6 +63,8 @@ const NewProduct = ({ history }) => {
             <h2 className="text-center mb-4 font-weight-bold">
               Agregar nuevo producto
             </h2>
+
+            {alert ? <p className={alert.classes}>{alert.msg}</p> : null}
 
             <form onSubmit={submitNewProduct}>
               <div className="form-group">

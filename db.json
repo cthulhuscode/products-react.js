@@ -1,11 +1,6 @@
 {
   "productos": [
     {
-      "id": 1,
-      "name": "Jugo de Zanahoria",
-      "price": "31111"
-    },
-    {
       "id": 2,
       "name": "Jugo de Naranja",
       "price": "1"
@@ -39,6 +34,21 @@
       "name": "Jugo de Arándano",
       "price": 32,
       "id": 8
+    },
+    {
+      "name": "Ass Juice",
+      "price": 69,
+      "id": 9
+    },
+    {
+      "name": "Sunglasses",
+      "price": 324,
+      "id": 10
+    },
+    {
+      "name": "New Magic Wand!",
+      "price": 60000,
+      "id": 11
     }
   ]
 }
