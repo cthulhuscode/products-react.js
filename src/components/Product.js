@@ -10,7 +10,7 @@ import {
 } from "../actions/productsActions";
 
 const Product = ({ product }) => {
-  const { name, price, id } = product;
+  const { name, price, id, key } = product;
 
   const dispatch = useDispatch();
   const history = useHistory(); // Enable history for redirection
@@ -30,7 +30,7 @@ const Product = ({ product }) => {
     }).then((result) => {
       if (result.value) {
         // Send it to the action
-        dispatch(deleteProductAction(id));
+        dispatch(deleteProductAction({ id, key }));
       }
     });
   };

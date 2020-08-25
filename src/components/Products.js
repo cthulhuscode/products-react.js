@@ -44,7 +44,7 @@ const Products = () => {
           </tr>
         </thead>
         <tbody>
-          {products.length === 0
+          {products === null
             ? "No hay productos"
             : products.map((product) => (
                 <Product key={product.id} product={product} />

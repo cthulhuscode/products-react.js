@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import shortid from "shortid";
 
 // Redux Actions
 import { createNewProductAction } from "../actions/productsActions";
@@ -45,7 +46,7 @@ const NewProduct = ({ history }) => {
     hideAlert();
 
     // Create new product
-    addProduct({ name, price });
+    addProduct({ id: shortid.generate(), name, price });
 
     // Reset fields
     setName("");

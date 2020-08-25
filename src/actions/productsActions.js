@@ -1,5 +1,7 @@
-import axiosClient from "../config/axios";
 import Swal from "sweetalert2";
+
+// Firebase
+import database from "../config/firebase";
 
 // Types
 import {
@@ -18,20 +20,25 @@ import {
   ERROR_EDITING_PRODUCT,
 } from "../types";
 
-/* -- Create new products -- */
+/* -- CREATE new products -- */
 export function createNewProductAction(product) {
   return async (dispatch) => {
     dispatch(addProduct());
 
     try {
-      // Insert in the API
-      await axiosClient.post("/productos", product);
-
-      // Update the state
-      dispatch(successfulAddedProduct(product));
-
-      // Alert success
-      Swal.fire("Correcto", "El producto se agregó correctamente", "success");
+      // Insert in the DB
+      database.ref("productos/").push(product, (err) => {
+        if (!err) {
+          // Update the state
+          dispatch(successfulAddedProduct(product));
+          // Alert success
+          Swal.fire(
+            "Correcto",
+            "El producto se agregó correctamente",
+            "success"
+          );
+        }
+      });
     } catch (error) {
       console.log(error);
       dispatch(unsuccessfulAddedProduct(true));
@@ -62,14 +69,16 @@ const unsuccessfulAddedProduct = (status) => ({
   payload: status,
 });
 
-/* -- Get the products from the DB -- */
+/* -- GET the products from the DB -- */
 export function getProductsAction() {
   return async (dispatch) => {
     dispatch(getProducts());
 
     try {
-      const response = await axiosClient.get("/productos");
-      dispatch(obtainedProducts(response.data));
+      await database.ref("/productos").once("value", async (snapshot) => {
+        const products = convertToArrayOfObjects(await snapshot.val());
+        dispatch(obtainedProducts(products));
+      });
     } catch (error) {
       console.log(error);
       dispatch(errorGettingProducts(true));
@@ -90,18 +99,31 @@ const errorGettingProducts = (status) => ({
   type: UNSUCCESSFUL_PRODUCTS_DOWNLOAD,
   payload: status,
 });
+const convertToArrayOfObjects = (data) => {
+  // Convert results to array of objects
+  const entries = Object.entries(data);
+  const products = entries.map((el) => {
+    el[1].key = el[0];
+    return el[1];
+  });
+  return products;
+};
 
-/* -- Delete product -- */
-export function deleteProductAction(id) {
+/* -- DELETE product -- */
+export function deleteProductAction({ id, key }) {
   return async (dispatch) => {
     dispatch(getProductToDelete(id));
 
     try {
-      await axiosClient.delete(`/productos/${id}`);
-      dispatch(productDeleted());
+      //await axiosClient.delete(`/productos/${id}`);
+      await database.ref(`/productos/${key}`).remove((err) => {
+        if (!err) {
+          dispatch(productDeleted());
 
-      // Show alert if deleted successful
-      Swal.fire("Eliminado!", "El producto ha sido eliminado.", "success");
+          // Show alert if deleted successful
+          Swal.fire("Eliminado!", "El producto ha sido eliminado.", "success");
+        }
+      });
     } catch (error) {
       dispatch(deletingProductError());
       console.log(error);
@@ -133,15 +155,24 @@ const getProductToEdit = (product) => ({
   payload: product,
 });
 
-/* Edit product in the API and State */
+/* EDIT product in the API and State */
 export function editProductAction(product) {
   return async (dispatch) => {
     dispatch(editProduct());
 
     try {
-      await axiosClient.put(`/productos/${product.id}`, product);
+      database.ref(`/productos/${product.key}`).update(product, (err) => {
+        if (!err) {
+          dispatch(editedProduct(product));
 
-      dispatch(editedProduct(product));
+          // Show alert if edition successful
+          Swal.fire(
+            "Actualizado!",
+            "El producto ha sido actualizado correctamente.",
+            "success"
+          );
+        }
+      });
     } catch (error) {
       console.log(error);
       dispatch(editingProductError);
